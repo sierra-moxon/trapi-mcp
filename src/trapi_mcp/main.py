@@ -1,10 +1,12 @@
 from fastmcp import FastMCP
+from .tools import trapi, one_hop
 
 # Create the FastMCP instance at module level
 mcp = FastMCP("trapi_mcp")
 
 # Register all tools
-mcp.tool("one_hop", "trapi")
+mcp.tool(one_hop)
+mcp.tool(trapi)
 
 
 def main():
