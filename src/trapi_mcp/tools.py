@@ -1,30 +1,26 @@
-"""basic TRAPI tools for MCP)"""
-
+# tools.py
 from typing import List, Dict, Any
-from api_utilities import submit_trapi_query, get_trapi_status, get_trapi_results
+from api_utilities import (
+    submit_trapi_query,
+    get_trapi_status,
+    get_trapi_results,
+    name_resolver,
+    node_normalizer
+)
 
 
-def trapi(subject: str,
-          object_: str,
-          predicate: str,
-          attributes: List[Dict[str, Any]] = None,
-          qualifiers: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+def trapi(
+    subject: str,
+    object_: str,
+    predicate: str,
+    attributes: List[Dict[str, Any]] = None,
+    qualifiers: List[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """
     Build a simple TRAPI query graph for a single edge between subject and object,
     submit it to the ARS, and return the submission response (including pk).
-
-    Parameters:
-        subject: CURIE for the subject node (e.g., "PUBCHEM.COMPOUND:644073").
-        object_: CURIE for the object node (e.g., "HP:0000217").
-        predicate: Biolink predicate CURIE (e.g., "biolink:related_to").
-        attributes: Optional list of TRAPI attribute objects for the edge.
-        qualifiers: Optional list of TRAPI qualifier objects for the edge.
-
-    Returns:
-        The raw JSON response from the ARS upon submission.
     """
-    # Construct the TRAPI message
-    message = {
+    message: Dict[str, Any] = {
         "message": {
             "query_graph": {
                 "nodes": {
@@ -41,40 +37,60 @@ def trapi(subject: str,
             }
         }
     }
-
-    # Attach attributes and qualifiers if provided
     if attributes:
         message["message"]["query_graph"]["edges"]["e0"]["attributes"] = attributes
     if qualifiers:
         message["message"]["query_graph"]["edges"]["e0"]["qualifiers"] = qualifiers
-
-    # Submit to ARS
-    submission_response = submit_trapi_query(message)
-    return submission_response
+    return submit_trapi_query(message)
 
 
 def trapi_status(pk: str) -> Dict[str, Any]:
-    """
-    Wrapper to check the status of a TRAPI job.
-
-    Parameters:
-        pk: Primary key returned by trapi().
-    Returns:
-        Status JSON payload.
-    """
+    """Check status of a TRAPI job."""
     return get_trapi_status(pk)
 
 
 def trapi_results(pk: str) -> Dict[str, Any]:
-    """
-    Wrapper to fetch results of a completed TRAPI job.
-
-    Parameters:
-        pk: Primary key returned by trapi().
-    Returns:
-        Results JSON payload.
-    """
+    """Fetch results of a completed TRAPI job."""
     return get_trapi_results(pk)
 
 
+def lookup_name(
+    string: str,
+    autocomplete: bool = True,
+    highlighting: bool = False,
+    offset: int = 0,
+    limit: int = 10,
+    biolink_type: List[str] = None,
+    only_prefixes: str = None,
+    exclude_prefixes: str = None,
+    only_taxa: str = None
+) -> List[Dict[str, Any]]:
+    """Wrapper around Name Resolver service."""
+    return name_resolver(
+        string=string,
+        autocomplete=autocomplete,
+        highlighting=highlighting,
+        offset=offset,
+        limit=limit,
+        biolink_type=biolink_type,
+        only_prefixes=only_prefixes,
+        exclude_prefixes=exclude_prefixes,
+        only_taxa=only_taxa
+    )
 
+
+def normalize_nodes(
+    curies: List[str],
+    conflate: bool = True,
+    drug_chemical_conflate: bool = False,
+    description: bool = False,
+    individual_types: bool = False
+) -> Dict[str, Any]:
+    """Wrapper around Node Normalizer service."""
+    return node_normalizer(
+        curies=curies,
+        conflate=conflate,
+        drug_chemical_conflate=drug_chemical_conflate,
+        description=description,
+        individual_types=individual_types
+    )
