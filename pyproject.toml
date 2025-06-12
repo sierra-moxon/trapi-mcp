@@ -1,0 +1,47 @@
+[project]
+name = "trapi-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.7.1",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nmdc-mcp"
+version = "0.2.0"
+description = "MCP tool for querying NMDC API"
+readme = "README.md"
+authors = [
+    {name = "Chris Mungall", email = "cjmungall@lbl.gov"},
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.7.1",
+    "requests>=2.32.4",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "black",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/smoxon/trapi-mcp"
+"Bug Tracker" = "https://github.com/smoxon/trapi-mcp/issues"
+
+[project.scripts]
+nmdc-mcp = "trapi_mcp.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trapi_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
