@@ -3,7 +3,6 @@ import requests
 
 # Base URLs for Translator services
 ARS_SUBMIT_URL = "https://ars-prod.transltr.io/ars/api/submit"
-ARS_STATUS_URL_TEMPLATE = "https://ars-prod.transltr.io/ars/api/status/{pk}"
 ARS_RESULTS_URL_TEMPLATE = "https://ars-prod.transltr.io/ars/api/messages/{pk}"
 NAME_RESOLVER_URL = "https://name-resolution-sri.renci.org/lookup"
 NODE_NORMALIZER_URL = "https://nodenormalization-sri.renci.org/1.5/get_normalized_nodes"
@@ -23,8 +22,13 @@ def get_trapi_status(pk: str) -> dict:
     """
     Check the status of a previously submitted TRAPI query by its primary key (pk).
     Returns the status payload as JSON.
+
+    The ARS tracks status in the message endpoint response. Status can be:
+    - "Running" - The query is still being processed
+    - "Done" - The query is complete
+    - "Error" - An error occurred during processing
     """
-    url = ARS_STATUS_URL_TEMPLATE.format(pk=pk)
+    url = ARS_RESULTS_URL_TEMPLATE.format(pk=pk)
     response = requests.get(url)
     response.raise_for_status()
     return response.json()

@@ -45,7 +45,17 @@ def trapi(
 
 
 def trapi_status(pk: str) -> Dict[str, Any]:
-    """Check status of a TRAPI job."""
+    """
+    Check status of a TRAPI job.
+
+    The status is retrieved from the ARS messages endpoint. Typical statuses are:
+    - "Running" - The ARS has sent this query to ARAs or begun merging, but it's not complete
+    - "Done" - No further changes to this message expected
+    - "Error" - Either a Translator tool returned an error or the ARS encountered processing error
+
+    The status of the parent message will be "Done" only after all Translator tools have
+    returned (or timed out) and the merging and post-processing is complete.
+    """
     return get_trapi_status(pk)
 
 
