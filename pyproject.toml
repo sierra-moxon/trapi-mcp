@@ -1,6 +1,6 @@
 [project]
 name = "trapi-mcp"
-version = "0.1.0"
+version = "0.0.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -9,12 +9,17 @@ dependencies = [
     "mcp>=1.9.3",
     "requests>=2.32.4",
 ]
-
+dynamic = [ "version" ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
 
+# Ref.: https://github.com/ninoseki/uv-dynamic-versioning/
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+fallback-version = "0.0.0"
 
 [dependency-groups]
 dev = [
