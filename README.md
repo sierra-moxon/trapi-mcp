@@ -25,9 +25,9 @@ from trapi_mcp.tools import trapi, trapi_status, trapi_results
 
 # Submit a TRAPI query
 response = trapi(
-    subject="MONDO:0005148",  # Alzheimer's disease
-    object_="CHEBI:6801",     # Acetylcholine
-    predicate="biolink:affects"
+  subject="MONDO:0005148",  # Alzheimer's disease
+  object="CHEBI:6801",  # Acetylcholine
+  predicate="biolink:affects"
 )
 
 # Get the query ID
@@ -39,8 +39,8 @@ print(f"Query status: {status_response.get('status')}")
 
 # When status is "Done", get results
 if status_response.get("status") == "Done":
-    results = trapi_results(pk)
-    # Process results
+  results = trapi_results(pk)
+  # Process results
 ```
 
 ## Developer Guide

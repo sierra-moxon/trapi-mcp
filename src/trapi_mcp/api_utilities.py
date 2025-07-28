@@ -12,7 +12,54 @@ def submit_trapi_query(query: dict) -> dict:
     """
     Submit a TRAPI query message to the ARS and return the raw JSON response.
     Raises an HTTPError if the request fails.
+    
+    Validates that the query is properly wrapped in a "message" object as required by ARS.
+    
+    Args:
+        query: A TRAPI-formatted query dictionary that must be wrapped in a "message" object.
+    
+    Example of a valid TRAPI query:
+        {
+            "message": {
+                "query_graph": {
+                    "nodes": {
+                        "n0": {
+                            "ids": ["MONDO:0021117"],
+                            "categories": ["biolink:Disease"]
+                        },
+                        "n1": {
+                            "categories": ["biolink:NamedThing"]
+                        }
+                    },
+                    "edges": {
+                        "e1": {
+                            "subject": "n0",
+                            "object": "n1",
+                            "predicates": ["biolink:risk_affected_by"]
+                        }
+                    }
+                }
+            }
+        }
+    
+    Returns:
+        Dictionary containing the ARS response with fields like:
+        - "pk": Primary key for tracking the query status
+        - "fields": Contains query status, data, timestamp, etc.
     """
+    # Validate that the query has the required "message" wrapper
+    if "message" not in query:
+        raise ValueError(
+            "TRAPI query must be wrapped in a 'message' object. "
+            "Expected format: {'message': {'query_graph': {...}}}"
+        )
+    
+    if "query_graph" not in query["message"]:
+        raise ValueError(
+            "TRAPI message must contain a 'query_graph' object. "
+            "Expected format: {'message': {'query_graph': {...}}}"
+        )
+    
     response = requests.post(ARS_SUBMIT_URL, json=query)
     response.raise_for_status()
     return response.json()

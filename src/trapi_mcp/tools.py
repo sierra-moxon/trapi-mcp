@@ -11,21 +11,56 @@ from .api_utilities import (
 
 def trapi(
     subject: str,
-    object_: str,
+    object: str,
     predicate: str,
     attributes: List[Dict[str, Any]] = None,
-    qualifiers: List[Dict[str, Any]] = None
+    qualifiers: List[Dict[str, Any]] = None,
+    subject_categories: List[str] = None,
+    object_categories: List[str] = None
 ) -> Dict[str, Any]:
     """
     Build a simple TRAPI query graph for a single edge between subject and object,
     submit it to the ARS, and return the submission response (including pk).
+    
+    Args:
+        subject: CURIE identifier for the subject node (e.g., "MONDO:0021117")
+        object: CURIE identifier for the object node (e.g., "HGNC:6284") or leave empty for open query
+        predicate: Biolink predicate (e.g., "biolink:risk_affected_by", "biolink:treats")
+        attributes: Optional list of edge attributes
+        qualifiers: Optional list of edge qualifiers
+        subject_categories: Optional biolink categories for subject (e.g., ["biolink:Disease"])
+        object_categories: Optional biolink categories for object (e.g., ["biolink:Gene"])
+    
+    Example usage:
+        # Find what affects risk for a specific disease
+        result = trapi(
+            subject="MONDO:0021117",
+            object="",  # Open query - find anything
+            predicate="biolink:risk_affected_by",
+            subject_categories=["biolink:Disease"],
+            object_categories=["biolink:NamedThing"]
+        )
+        
+        # Find phenotypes associated with a gene
+        result = trapi(
+            subject="HGNC:6284",
+            object="",
+            predicate="biolink:associated_with",
+            subject_categories=["biolink:Gene"],
+            object_categories=["biolink:PhenotypicFeature"]
+        )
+    
+    Returns:
+        ARS submission response containing:
+        - "pk": Primary key to track query status
+        - "fields": Query metadata and status
     """
     message: Dict[str, Any] = {
         "message": {
             "query_graph": {
                 "nodes": {
-                    "n0": {"ids": [subject]},
-                    "n1": {"ids": [object_]}
+                    "n0": {},
+                    "n1": {}
                 },
                 "edges": {
                     "e0": {
@@ -37,6 +72,16 @@ def trapi(
             }
         }
     }
+    
+    # Add IDs only if provided (for open queries, nodes have only categories)
+    if subject:
+        message["message"]["query_graph"]["nodes"]["n0"]["ids"] = [subject]
+    if object:
+        message["message"]["query_graph"]["nodes"]["n1"]["ids"] = [object]
+    if subject_categories:
+        message["message"]["query_graph"]["nodes"]["n0"]["categories"] = subject_categories
+    if object_categories:
+        message["message"]["query_graph"]["nodes"]["n1"]["categories"] = object_categories
     if attributes:
         message["message"]["query_graph"]["edges"]["e0"]["attributes"] = attributes
     if qualifiers:
