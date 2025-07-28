@@ -46,6 +46,7 @@ def submit_trapi_query(query: dict) -> dict:
         Dictionary containing the ARS response with fields like:
         - "pk": Primary key for tracking the query status
         - "fields": Contains query status, data, timestamp, etc.
+
     """
     # Validate that the query has the required "message" wrapper
     if "message" not in query:

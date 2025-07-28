@@ -36,7 +36,7 @@ dev = [
 "Bug Tracker" = "https://github.com/smoxon/trapi-mcp/issues"
 
 [project.scripts]
-nmdc-mcp = "trapi_mcp.main:main"
+nmdc-mcp = "trapi_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trapi_mcp"]
