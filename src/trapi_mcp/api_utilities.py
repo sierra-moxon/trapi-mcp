@@ -85,7 +85,43 @@ def get_trapi_status(pk: str) -> dict:
 def get_trapi_results(pk: str) -> dict:
     """
     Retrieve the results of a completed TRAPI query by its primary key (pk).
-    Returns the results payload as JSON.
+    
+    This endpoint fetches the full TRAPI response from the ARS, which includes:
+    - query_graph: The original query that was submitted
+    - knowledge_graph: All nodes and edges found across all ARAs
+    - results: Array of result objects with node_bindings, analyses, and scores
+    
+    Args:
+        pk: Primary key UUID returned from submit_trapi_query (e.g., "4d3c7605-47ff-4907-8082-9506abcf5a83")
+    
+    Returns:
+        Dictionary with ARS response structure:
+        {
+            "model": "tr_ars.message",
+            "pk": "4d3c7605-47ff-4907-8082-9506abcf5a83",
+            "fields": {
+                "status": "Done",  # Should be "Done" before calling this
+                "data": {
+                    "message": {
+                        "query_graph": {...},      # Original query
+                        "knowledge_graph": {...},  # All found nodes/edges
+                        "results": [...]           # Array of answers with bindings and scores
+                    }
+                }
+            }
+        }
+    
+    Usage:
+        # First check status until "Done"
+        status = trapi_status(pk)
+        if status["fields"]["status"] == "Done":
+            results = get_trapi_results(pk)
+            # Access the TRAPI message
+            trapi_message = results["fields"]["data"]["message"]
+            # Access individual results
+            for result in trapi_message["results"]:
+                # Each result has node_bindings, analyses, and normalized_score
+                print(f"Score: {result['normalized_score']}")
     """
     url = ARS_RESULTS_URL_TEMPLATE.format(pk=pk)
     response = requests.get(url)
