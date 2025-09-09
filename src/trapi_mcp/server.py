@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from .tools import normalize_nodes, lookup_name
+from .tools import normalize_nodes, lookup_name, genetics_kp
 
 # Create the FastMCP instance at module level
 mcp = FastMCP("trapimcp")
@@ -7,6 +7,7 @@ mcp = FastMCP("trapimcp")
 # Register all tools
 mcp.tool(lookup_name)
 mcp.tool(normalize_nodes)
+mcp.tool(genetics_kp)
 
 
 def main():

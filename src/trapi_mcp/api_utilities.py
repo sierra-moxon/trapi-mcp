@@ -4,6 +4,7 @@ import requests
 # Base URLs for Translator services
 NAME_RESOLVER_URL = "https://name-resolution-sri.renci.org/lookup"
 NODE_NORMALIZER_URL = "https://nodenormalization-sri.renci.org/1.5/get_normalized_nodes"
+GENETICS_KP_URL = "https://genetics-kp.transltr.io/genetics_provider/trapi/v1.5/query"
 
 
 def name_resolver(
@@ -73,5 +74,76 @@ def node_normalizer(
     ])
 
     response = requests.get(NODE_NORMALIZER_URL, params=params)
+    response.raise_for_status()
+    return response.json()
+
+
+def genetics_kp_query(query: dict) -> dict:
+    """
+    Submit a TRAPI query to the Genetics Knowledge Provider and return the response.
+
+    This endpoint supports genetic associations between:
+    - Disease ↔ Gene (biolink:condition_associated_with_gene, biolink:gene_associated_with_condition)
+    - Disease ↔ Cell (biolink:genetic_association)
+    - Disease ↔ Pathway (biolink:genetic_association)
+    - Gene ↔ PhenotypicFeature (biolink:gene_associated_with_condition)
+    - Cell ↔ PhenotypicFeature (biolink:genetic_association)
+    - Pathway ↔ PhenotypicFeature (biolink:genetic_association)
+
+    Supported node types and ID prefixes:
+    - biolink:Disease: MONDO, EFO, UMLS, HP, NCIT, MESH, SNOMEDCT, DOID
+    - biolink:Gene: NCBIGene, ENSEMBL, HGNC, OMIM, UMLS, UniProtKB
+    - biolink:Cell: UBERON
+    - biolink:Pathway: GO, REACT, BIOCARTA, KEGG, WP
+    - biolink:PhenotypicFeature: MONDO, EFO, UMLS, HP, NCIT, MESH, SNOMEDCT, DOID
+
+    Args:
+        query: A TRAPI-formatted query dictionary with a "message" wrapper containing "query_graph"
+
+    Example query structure:
+        {
+            "message": {
+                "query_graph": {
+                    "nodes": {
+                        "n00": {
+                            "ids": ["MONDO:0011936"],
+                            "categories": ["biolink:Disease"]
+                        },
+                        "n01": {
+                            "categories": ["biolink:Gene"]
+                        }
+                    },
+                    "edges": {
+                        "e00": {
+                            "subject": "n00",
+                            "object": "n01",
+                            "predicates": ["biolink:condition_associated_with_gene"]
+                        }
+                    }
+                }
+            }
+        }
+
+    Returns:
+        Dictionary containing the TRAPI response with:
+        - message: Full TRAPI message with query_graph, knowledge_graph, and results
+        - status: Success/Error status
+        - description: Human-readable description
+        - logs: Processing logs
+    """
+    # Validate that the query has the required "message" wrapper
+    if "message" not in query:
+        raise ValueError(
+            "Genetics KP query must be wrapped in a 'message' object. "
+            "Expected format: {'message': {'query_graph': {...}}}"
+        )
+
+    if "query_graph" not in query["message"]:
+        raise ValueError(
+            "Genetics KP message must contain a 'query_graph' object. "
+            "Expected format: {'message': {'query_graph': {...}}}"
+        )
+
+    response = requests.post(GENETICS_KP_URL, json=query)
     response.raise_for_status()
     return response.json()
