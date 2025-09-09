@@ -1,6 +1,6 @@
 import pytest
 import requests
-from src.trapi_mcp.tools import genetics_kp
+from src.trapi_mcp.api_utilities import genetics_kp
 
 
 class TestGeneticsKP:

@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from .tools import normalize_nodes, lookup_name, genetics_kp
+from .api_utilities import normalize_nodes, lookup_name, genetics_kp
 
 # Create the FastMCP instance at module level
 mcp = FastMCP("trapimcp")
